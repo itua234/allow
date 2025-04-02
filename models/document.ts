@@ -1,4 +1,5 @@
 import { Sequelize, DataTypes, Model, InferAttributes, InferCreationAttributes } from 'sequelize';
+const { encrypt, decrypt } = require('@util/helper');
 
 // Define the DocumentAttributes interface
 interface DocumentAttributes extends Model<InferAttributes<DocumentAttributes>, InferCreationAttributes<DocumentAttributes>> {
@@ -12,14 +13,8 @@ interface DocumentAttributes extends Model<InferAttributes<DocumentAttributes>, 
     expired_at: Date;
 }
 
-// Define the DocumentModelStatic type
-type DocumentModelStatic = typeof Model & {
-    new (values?: object, options?: object): DocumentAttributes;
-    associate: (models: { User: any }) => void;
-};
-
 module.exports = (sequelize: Sequelize, DataTypes: typeof import('sequelize').DataTypes) => {
-    const Document = <DocumentModelStatic>sequelize.define<DocumentAttributes>('Document', {
+    const Document = sequelize.define<DocumentAttributes>('Document', {
         id: { type: DataTypes.UUID, primaryKey: true, defaultValue: DataTypes.UUIDV4 },
         user_id: {
             type: DataTypes.UUID,
@@ -43,7 +38,17 @@ module.exports = (sequelize: Sequelize, DataTypes: typeof import('sequelize').Da
             ),
             allowNull: false
         },
-        text: { type: DataTypes.STRING, allowNull: false },
+        text: { 
+            type: DataTypes.STRING, 
+            allowNull: false,
+            get() {
+                const encryptedValue = this.getDataValue('text');
+                return encryptedValue ? decrypt(encryptedValue) : null;
+            },
+            set(value: string) {
+                this.setDataValue('text', encrypt(value));
+            }
+        },
         image: { type: DataTypes.STRING, allowNull: false },
         verified: {
             type: DataTypes.BOOLEAN,

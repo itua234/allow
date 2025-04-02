@@ -1,4 +1,5 @@
 import { Sequelize, DataTypes, Model, Optional, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
+const { encrypt, decrypt } = require('@util/helper');
 
 interface UserAttributes extends Model<InferAttributes<UserAttributes>, InferCreationAttributes<UserAttributes>> {
     id: string;
@@ -31,26 +32,26 @@ module.exports = (sequelize: Sequelize, DataTypes: typeof import('sequelize').Da
             type: DataTypes.STRING,
             allowNull: false,
             get() {
-                const rawValue = this.getDataValue('firstname');
-                return rawValue ? rawValue : null;
+                const encryptedValue = this.getDataValue('firstname');
+                return encryptedValue ? decrypt(encryptedValue) : null;
             },
             set(value: string) {
                 value = value.toLowerCase();
                 value = value.charAt(0).toUpperCase() + value.slice(1);
-                this.setDataValue('firstname', value);
+                this.setDataValue('firstname', encrypt(value));
             }
         },
         lastname: {
             type: DataTypes.STRING,
             allowNull: false,
             get() {
-                const rawValue = this.getDataValue('lastname');
-                return rawValue ? rawValue : null;
+                const encryptedValue = this.getDataValue('lastname');
+                return encryptedValue ? decrypt(encryptedValue) : null;
             },
             set(value: string) {
                 value = value.toLowerCase();
                 value = value.charAt(0).toUpperCase() + value.slice(1);
-                this.setDataValue('lastname', value);
+                this.setDataValue('lastname', encrypt(value));
             }
         },
         email: {
@@ -58,15 +59,36 @@ module.exports = (sequelize: Sequelize, DataTypes: typeof import('sequelize').Da
             unique: true,
             allowNull: false,
             get() {
-                const rawValue = this.getDataValue('email');
-                return rawValue ? rawValue : null;
+                const encryptedValue = this.getDataValue('email');
+                return encryptedValue ? decrypt(encryptedValue) : null;
             },
             set(value: string) {
-                this.setDataValue('email', value.toLowerCase());
+                this.setDataValue('email', encrypt(value.toLowerCase()));
             }
         },
-        phone: {type: DataTypes.STRING, unique: true, allowNull: false},
-        dob: {type: DataTypes.STRING, allowNull: false},
+        phone: {
+            type: DataTypes.STRING, 
+            unique: true, 
+            allowNull: false,
+            get() {
+                const encryptedValue = this.getDataValue('phone');
+                return encryptedValue ? decrypt(encryptedValue) : null;
+            },
+            set(value: string) {
+                this.setDataValue('phone', encrypt(value));
+            }
+        },
+        dob: {
+            type: DataTypes.STRING, 
+            allowNull: false,
+            get() {
+                const encryptedValue = this.getDataValue('dob');
+                return encryptedValue ? decrypt(encryptedValue) : null;
+            },
+            set(value: string) {
+                this.setDataValue('dob', encrypt(value));
+            }
+        },
         verified: {
             type: DataTypes.BOOLEAN,
             defaultValue: false,

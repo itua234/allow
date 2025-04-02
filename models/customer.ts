@@ -1,4 +1,5 @@
 import { Sequelize, DataTypes, Model, InferAttributes, InferCreationAttributes } from 'sequelize';
+import bcrypt from 'bcrypt';
 
 // Define the CustomerAttributes interface
 interface CustomerAttributes extends Model<InferAttributes<CustomerAttributes>, InferCreationAttributes<CustomerAttributes>> {
@@ -52,6 +53,24 @@ module.exports = (sequelize: Sequelize, DataTypes: typeof import('sequelize').Da
         notificationsEnabled: { type: DataTypes.BOOLEAN, defaultValue: true },
         email_verified_at: { type: DataTypes.DATE, allowNull: true },
     }, {
+        hooks: {
+            beforeCreate: async (customer: CustomerAttributes) => {
+                if (customer.password) {
+                    const salt = await bcrypt.genSalt(10);
+                    const hashedPassword = await bcrypt.hash(customer.password, salt);
+                    customer.password = hashedPassword;
+                }
+            },
+            beforeUpdate: async (customer: CustomerAttributes) => {
+                if (customer.changed('password') && customer.password) {
+                    const salt = await bcrypt.genSalt(10);
+                    const hashedPassword = await bcrypt.hash(customer.password, salt);
+                    customer.password = hashedPassword;
+                }
+            }
+        },
+        tableName: 'customers',
+        timestamps: true,
         defaultScope: {
             attributes: { exclude: ['createdAt', 'updatedAt'] }
         }
