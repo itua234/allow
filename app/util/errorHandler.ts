@@ -1,7 +1,9 @@
-//const AppError = require('./appError');
+import { Request, Response, NextFunction } from 'express';
+import AppError from './appError';
+
 const { PORT, NODE_ENV } = process.env; 
 
-const sendErrorDev = (err, res) => {
+const sendErrorDev = (err: AppError, res: Response) => {
     res.status(err.statusCode).json({
         status: err.status,
         error: err,
@@ -10,7 +12,7 @@ const sendErrorDev = (err, res) => {
     });
 }
 
-const sendErrorProd = (err, res) => {
+const sendErrorProd = (err: AppError, res: Response) => {
     if(err.isOperational){
         res.status(err.statusCode).json({
             status: err.status,
@@ -26,7 +28,7 @@ const sendErrorProd = (err, res) => {
     }
 }
 
-module.exports = (err, req, res, next) => {
+export default (err: AppError, req: Request, res: Response, _next: NextFunction) => {
     err.statusCode = err.statusCode || 500;
     err.status = err.status || "error";
     if(NODE_ENV === "development"){
@@ -35,4 +37,4 @@ module.exports = (err, req, res, next) => {
         let error = { ...err };
         sendErrorProd(error, res);
     }
-}
+};

@@ -1,3 +1,4 @@
+//import { Sequelize, Model, DataTypes } from 'sequelize';
 const Sequelize = require('sequelize');
 const fs = require('fs');
 const path = require('path');
@@ -42,4 +43,4 @@ Object.keys(db.models).forEach(modelName => {
     }
 });
 
-module.exports = db;
+export default db;

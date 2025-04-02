@@ -1,15 +1,19 @@
-const express = require('express');
+import express, { Request, Response, NextFunction } from 'express';
 const router = express.Router();
+//import { appGuard, authGuard } from "@middleware/auth";
+import multer, { MulterError, StorageEngine } from 'multer';
+
 // const authRoutes = require('./authRoutes');
 // const wallet = require('@controllers/wallet');
 // const user = require('@controllers/user');
 
-const { appGuard, authGuard } = require("@middleware/auth");
-const multer = require('multer');
-const storage = multer.memoryStorage();
+// Configure multer for file uploads
+const storage: StorageEngine = multer.memoryStorage();;
 const upload = multer({ storage: storage });
-const handleMulterError = (err, req, res, next) => {
-    if(err instanceof multer.MulterError && err.code === "LIMIT_FILE_COUNT"){
+
+// Middleware to handle multer errors
+const handleMulterError = (err: any, req: Request, res: Response, next: NextFunction) => {
+    if(err instanceof MulterError && err.code === "LIMIT_FILE_COUNT"){
         console.log("Too many files. Max allowed: 5 files");
         return res.status(422).json({
             message: "failed to create new event",
@@ -26,7 +30,7 @@ const handleMulterError = (err, req, res, next) => {
     next();
 }
 
-router.get('/', function (req, res) {
+router.get('/', function (req: Request, res: Response) {
     res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.json({
         status: 'ok',
@@ -34,8 +38,8 @@ router.get('/', function (req, res) {
         version: '1.1.0'
     });
 });
-// router.use("/auth", authRoutes);
 
+// router.use("/auth", authRoutes);
 // router.get('/user', [authGuard], user.get_user)
 
-module.exports = router;
+export default router;

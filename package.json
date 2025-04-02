@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js",
+    "dev": "nodemon app.ts",
+    "build": "tsc",
     "test": "dotenv -e .env.test -- jest --detectOpenHandles"
   },
   "author": "Itua Osemeilu",
@@ -51,6 +52,11 @@
     "@config": "config"
   },
   "devDependencies": {
-    "sequelize-cli": "^6.6.2"
+    "@types/express": "^5.0.1",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^22.13.17",
+    "sequelize-cli": "^6.6.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
   }
 }
