@@ -1,0 +1,150 @@
+@import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Jost:wght@300;400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap');
+:root{
+    --bs-blue: #0d6efd;
+    --bs-indigo: #6610f2;
+    --bs-purple: #6f42c1;
+    --bs-pink: #d63384;
+    --bs-red: #dc3545;
+    --bs-orange: #fd7e14;
+    --bs-yellow: #ffc107;
+    --bs-green: #198754;
+    --bs-teal: #20c997;
+    --bs-cyan: #0dcaf0;
+    --bs-white: #fff;
+    --bs-gray: #7d879c;
+    --bs-gray-dark: #373f50;
+    --bs-primary: #233E83;
+    --bs-accent: #4e54c8;
+    --bs-secondary: #F79D1D;
+    --bs-success: #42d697;
+    --bs-info: #69b3fe;
+    --bs-warning: #fea569;
+    --bs-danger: #f34770;
+    --bs-light: #fff;
+    --bs-dark: #373f50;
+    --bs-font-sans-serif: "Red Hat Display", sans-serif;
+    --bs-font-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --bs-gradient: linear-gradient(180deg, rgba(255,255,255,0.15), rgba(255,255,255,0));
+}
+*,*::before,*::after{
+    -webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+    box-sizing:border-box;
+}
+body{
+    margin:0;
+    font-family:var(--bs-font-sans-serif);
+    font-family: "Quicksand", sans-serif;
+    font-size:1rem;
+    font-weight:400;
+    line-height:1.5;
+    color:#4b566b;
+    background-color:#fff;
+    -webkit-text-size-adjust:100%;
+    -webkit-tap-highlight-color:rgba(0,0,0,0);
+}
+h1,.h1,h2,.h2,h3,.h3,h4,.h4,h5,.h5,h6,.h6{
+    margin-top:0;
+    margin-bottom:.75rem;
+    font-weight:500;
+    line-height:1.2;
+    color:#373f50;
+}
+
+.custom-text-primary{
+    color: var(--bs-primary);
+}
+.custom-text-secondary{
+    color: var(--bs-secondary);
+}
+
+
+.box1{
+    background-color:#4f659c;
+}
+.box2{
+    background-color:white;
+    border:2px solid transparent;
+    border-top-left-radius: 30px;
+    border-bottom-left-radius: 30px
+}
+@media (max-width: 768px) {
+    .box1{
+        background-color:#4f659c;
+        display: none;
+    }
+}
+@media (min-width: 768px) {
+    .dynamic-logo{
+        display: none;
+    }
+}
+
+.input-box{
+    border:2px solid transparent;
+    border-radius: 10px;
+    background-color:rgba(247, 157, 29, 0.1);
+}
+.custom-input{
+    padding:10px;
+    padding-left: 30px;
+    border-color: transparent;
+    background-color: transparent;
+    width: 100%;
+}
+.custom-select{
+    background-color:rgba(247, 157, 29, 0.1);
+    border-color: transparent;
+    height: 50px;
+}
+.custom-input::placeholder {
+    color: rgba(30, 30, 30, 0.35); 
+    font-size: 14px;
+    font-family: "Quicksand", sans-serif;
+}
+.custom-input-label{
+    font-weight: 500;
+    font-size: 16px
+}
+.custom-input:focus, .custom-input:active,  .custom-input:active{
+    background-color: transparent;
+    outline: none;
+    border-color: none;
+}
+.icon-box{
+    top:0;
+    left:0
+}
+.country_code{
+    border: none;
+    width: 80px;
+    border-right:1px solid #1E1E1E33;
+    background-color: transparent;
+    -webkit-appearance: none; /* Hide default arrow in Safari */
+    -moz-appearance: none; /* Hide default arrow in Firefox */
+    appearance: none; /* Hide default arrow in other browsers */
+    background-image: none; /* Remove the background arrow icon */
+    padding: 7px; /* Add some padding to ensure text doesn't touch the edge */
+}
+.country_code::-ms-expand {
+    display: none; /* Hide default arrow in IE10+ */
+}
+.custom-btn{
+    padding:10px 30px;
+    color: white;
+    border:1px solid transparent;
+    border-radius: 10px;
+    background-color: var(--bs-primary);
+}
+.custom-btn:hover{
+    text-decoration: none;
+    color: var(--bs-secondary);
+}
+
+
+#loader-gif{
+    width:20px;
+    height:20px;
+}
