@@ -1,3 +1,4 @@
+import { Response } from 'express';
 import crypto from 'crypto';
 
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'your-encryption-key'; // Must be 32 bytes
@@ -21,4 +22,15 @@ function decrypt(text: string): string {
     return decrypted.toString();
 }
 
-export default { encrypt, decrypt };
+const returnValidationError = (errors: any, res: Response, message: string) => {
+    Object.keys(errors).forEach((key, index) => {
+        errors[key] = errors[key]["message"];
+    });
+
+    return res.status(422).json({
+        message: message,
+        error: errors
+    });
+}
+
+export default { encrypt, decrypt, returnValidationError};

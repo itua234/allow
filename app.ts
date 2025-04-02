@@ -96,7 +96,7 @@ function useRoutes(): void {
 
   // Route to render test page
   app.get('/', (req: Request, res: Response) => {
-    res.render('test-modal', {
+    res.render('index', {
       companyId: 'dev_company_123', // Your test company ID
       apiKey: 'test_api_key_123'    // Your test API key
     });
