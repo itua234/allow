@@ -1,9 +1,10 @@
 import express, { Request, Response, NextFunction } from 'express';
 const router = express.Router();
-//import { appGuard, authGuard } from "@middleware/auth";
+//import { appGuard, authGuard } from "@middleware/auth.middleware";
 import multer, { MulterError, StorageEngine } from 'multer';
 
 // const authRoutes = require('./authRoutes');
+// const auth = require('@controllers/auth.controller');
 // const wallet = require('@controllers/wallet');
 // const user = require('@controllers/user');
 

@@ -4,7 +4,7 @@ import { Sequelize, QueryTypes, Op } from 'sequelize';
 const { sequelize }: { 
     sequelize: Sequelize; 
 } = require('@models');
-const User = require('@models/user'); // Assuming User is the default export
+const User = require('@models/user');
 const {returnValidationError} = require("@util/helper");
 
 niv.extend('hasSpecialCharacter', ({ value }: { value: string }) => {
