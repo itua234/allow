@@ -1,7 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt, { JwtPayload } from 'jsonwebtoken';
+const jwt = require('jsonwebtoken');
+import { JwtPayload } from 'jsonwebtoken';
 const User = require('@models/user');
-const { TOKEN_SECRET, APP_TOKEN, REFRESH_TOKEN_SECRET, TOKEN_EXPIRE, REFRESH_TOKEN_EXPIRE } = process.env;
+const { 
+    TOKEN_SECRET, 
+    APP_TOKEN, 
+    REFRESH_TOKEN_SECRET, 
+    TOKEN_EXPIRE, 
+    REFRESH_TOKEN_EXPIRE 
+} = process.env;
 
 module.exports = {
     authGuard: async (req: Request, res: Response, next: NextFunction) => {
@@ -38,22 +45,10 @@ module.exports = {
     },
 
     createAccessToken: (user: Record<string, any>): string => {
-        return jwt.sign(
-            { user },
-            TOKEN_SECRET || "fgfgfggf",
-            {
-                expiresIn: TOKEN_EXPIRE || '1h',
-            }
-        );
+        return jwt.sign({ user }, TOKEN_SECRET || 'default_token_secret', { algorithm: 'RS256', expiresIn: TOKEN_EXPIRE });
     },
 
     createRefreshToken: (user: Record<string, any>): string => {
-        return jwt.sign(
-            { user: user.id },
-            (REFRESH_TOKEN_SECRET || "hdgddgdgg") as string,
-            {
-                expiresIn: REFRESH_TOKEN_EXPIRE || '30d',
-            }
-        );
+        return jwt.sign({ user: user.id }, REFRESH_TOKEN_SECRET || 'default_token_secret', { algorithm: 'RS256', expiresIn: REFRESH_TOKEN_EXPIRE });
     },
 }
