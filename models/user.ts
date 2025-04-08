@@ -1,7 +1,7 @@
 import { Sequelize, DataTypes, Model, Optional, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
 const { encrypt, decrypt } = require('@util/helper');
 
-interface UserAttributes extends Model<InferAttributes<UserAttributes>, InferCreationAttributes<UserAttributes>> {
+export default interface UserAttributes extends Model<InferAttributes<UserAttributes>, InferCreationAttributes<UserAttributes>> {
     id: string;
     //id: CreationOptional<number>;
     firstname: string;

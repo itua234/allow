@@ -5,8 +5,7 @@ import multer, { MulterError, StorageEngine } from 'multer';
 
 // const authRoutes = require('./authRoutes');
 // const auth = require('@controllers/auth.controller');
-// const wallet = require('@controllers/wallet');
-// const user = require('@controllers/user');
+// const user = require('@controllers/user.controller');
 
 // Configure multer for file uploads
 const storage: StorageEngine = multer.memoryStorage();;
@@ -40,7 +39,49 @@ router.get('/', function (req: Request, res: Response) {
     });
 });
 
-// router.use("/auth", authRoutes);
+router.post('/allow/initiate', function (req: Request, res: Response) {
+    res.json({
+        status: 'ok',
+        app: 'allow!! API...',
+        version: '1.1.0'
+    });
+});
+router.get('/allow/customers', function (req: Request, res: Response) {
+    res.json({
+        status: 'ok',
+        app: 'allow!! API...',
+        version: '1.1.0'
+    });
+});
+router.route('/allow/customers/:reference') 
+.get(function (req: Request, res: Response) {
+    res.json({
+        status: 'ok',
+        app: 'allow!! API...',
+        version: '1.1.0'
+    });
+}).delete(function (req: Request, res: Response) {
+    res.json({
+        status: 'ok',
+        app: 'allow!! API...',
+        version: '1.1.0'
+    });
+});
+
+router.post('/allow/customers/blacklist', function (req: Request, res: Response) {
+    res.json({
+        status: 'ok',
+        app: 'allow!! API...',
+        version: '1.1.0'
+    });
+});
+router.post('/allow/customers/whitelist', function (req: Request, res: Response) {
+    res.json({
+        status: 'ok',
+        app: 'allow!! API...',
+        version: '1.1.0'
+    });
+});
 // router.get('/user', [authGuard], user.get_user)
 
 export default router;

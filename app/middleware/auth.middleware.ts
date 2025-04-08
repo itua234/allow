@@ -9,8 +9,10 @@ const {
     TOKEN_EXPIRE, 
     REFRESH_TOKEN_EXPIRE 
 } = process.env;
+//const { UserAttributes } = require('@models/user'); 
 
-module.exports = {
+//export the auth middlewares
+export default {
     authGuard: async (req: Request, res: Response, next: NextFunction) => {
         try{
             const authHeader = req.headers['authorization'];
