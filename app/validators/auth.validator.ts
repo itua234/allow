@@ -4,7 +4,6 @@ import { Sequelize, QueryTypes, Op } from 'sequelize';
 const { sequelize }: { 
     sequelize: Sequelize; 
 } = require('@models');
-const User = require('@models/user');
 const {returnValidationError} = require("@util/helper");
 
 niv.extend('hasSpecialCharacter', ({ value }: { value: string }) => {
@@ -29,68 +28,73 @@ niv.extend('isSingleWord', ({ value }: { value: string }) => {
     return true;
 })
 niv.extend('unique', async ({ attr, value, args }: { attr: string; value: string; args: string[] }) => {
+    const table = args[0];
     const field = args[1] || attr;
-    let emailExist;
-    if(args[2]){
-        emailExist = await sequelize.query(`SELECT * FROM ${args[0]} WHERE ${field}=? AND id != ? LIMIT 1`,{
-            replacements: [value, args[2]],
-            type: QueryTypes.SELECT
-        })
-    }else{
-        emailExist = await sequelize.query(`SELECT * FROM ${args[0]} WHERE ${field}=? LIMIT 1`,{
-            replacements: [value],
-            type: QueryTypes.SELECT
-        })
+    const excludeId = args[2]; // Optional: ID to exclude from the check (for updates)
+    // Validate table name and field to prevent SQL injection
+    if (!table || !field) {
+        throw new Error('Table name and field are required for the unique validation');
     }
-    
-    if(emailExist.length !== 0){
-        return false;
+
+    let query = `SELECT * FROM ${table} WHERE ${field} = ?`;
+    const replacements: any[] = [value];
+    if (excludeId) {
+        query += ' AND id != ?';
+        replacements.push(excludeId);
     }
-    return true;
+    query += ' LIMIT 1';
+
+    const result = await sequelize.query(query, {
+        replacements,
+        type: QueryTypes.SELECT,
+    });
+
+    return result.length === 0; // Return true if no matching record is found
 })
 niv.extend('exists', async ({ attr, value, args }: { attr: string; value: string; args: string[] }) => {
     const field = args[1] || attr;
-    let emailExist = await sequelize.query(`SELECT * FROM ${args[0]} WHERE ${field}=? LIMIT 1`,{
+    let result = await sequelize.query(`SELECT * FROM ${args[0]} WHERE ${field}=? LIMIT 1`,{
         replacements: [value],
         type: QueryTypes.SELECT
     })
-    if(emailExist.length === 0){
-        return false;
-    }
-    return true;
+    return result.length !== 0; // Return true if matching record is found
 });
 niv.extend('confirmed', ({ attr, value }: { attr: string; value: string }, validator: niv.Validator) => {
     const field = `${attr}_confirmation`;
     const secondValue = validator.inputs[field];
-    if (value !== secondValue) {
-        return false;
-    }
-    return true;
+    return value === secondValue;
 });
 niv.extend('phoneWithCountryCode', ({value}: {value: string}) => {
     const phoneWithCountryCodeRegex = /^\+[1-9]{1}[0-9]{1,14}$/; // Adjust regex based on your requirements
     return phoneWithCountryCodeRegex.test(value);
 });
-niv.extend('phoneVerified', async ({value}: {value: string}) => {
-    let phoneVerified = await User.findOne({
-        where: {
-            phone: value,
-            phone_verified_at: {
-                [Op.not]: null
-            }
-        }
-    });
-    if(phoneVerified){
-        return false;
+niv.extend('verified', async ({attr, value, args}: { attr: string; value: string; args: string[]}) => {
+    const table = args[0];
+    const field = args[1] || attr;
+    const verifiedField = args[2] || field+'_verified_at';
+
+    // Validate table and field to prevent SQL injection
+    if (!table || !field) {
+        throw new Error('Table name and field are required for the verified validation');
     }
-    return true;
+
+    // Query the database dynamically
+    const query = `SELECT * FROM ${table} WHERE ${field} = ? AND ${verifiedField} IS NOT NULL LIMIT 1`;
+    const replacements: any[] = [value];
+
+    const result = await sequelize.query(query, {
+        replacements,
+        type: QueryTypes.SELECT,
+    });
+
+    return result.length === 0; // Return true if no matching record is found
 });
 niv.extendMessages({
     hasSpecialCharacter: 'The :attribute field must have a special character',
     containsNumber: 'The :attribute field must contain a number',
     isSingleWord: 'The :attribute field must be a single word',
     exists: 'The selected :attribute is invalid.',
-    phoneVerified: 'This :attribute already exist',
+    verified: 'This :attribute already exist',
     phoneWithCountryCode: 'The phone number must include a valid country code and be in the correct format.'
 });
 
@@ -135,5 +139,31 @@ export default {
             req.body = v.inputs;
             next();
         }
-    }
+    },
+
+    validateCustomerPayload: async (req: Request, res: Response, next: NextFunction) => {
+        const v = new niv.Validator(req.body, {
+            'customer.name': 'required|string',
+            'customer.address': 'required|string',
+            'customer.email': 'required|email',
+            'customer.identity.number': 'required|string|minLength:11|maxLength:11',
+            'customer.identity.type': 'required|string|in:bvn,nin,passport',
+            'reference': 'required|string',
+            'redirect_url': 'required|url',
+            'kyc_level': 'required|string|in:tier_1,tier_2,tier_3',
+            'bank_accounts': 'boolean',
+        });
+
+        const matched = await v.check();
+        if (!matched) {
+            const errors = v.errors;
+            returnValidationError(errors, res, "Validation failed for customer payload");
+        } else {
+            if (!req.value) {
+                req.value = {};
+            }
+            req.body = v.inputs;
+            next();
+        }
+    },
 }

@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 const router = express.Router();
 //import { appGuard, authGuard } from "@middleware/auth.middleware";
 import multer, { MulterError, StorageEngine } from 'multer';
+import customerValidator from '@validators/auth.validator';
 
 // const authRoutes = require('./authRoutes');
 // const auth = require('@controllers/auth.controller');
@@ -41,9 +42,8 @@ router.get('/', function (req: Request, res: Response) {
 
 router.post('/allow/initiate', function (req: Request, res: Response) {
     res.json({
-        status: 'ok',
-        app: 'allow!! API...',
-        version: '1.1.0'
+        message: 'Customer payload is valid!',
+        data: req.body,
     });
 });
 router.get('/allow/customers', function (req: Request, res: Response) {
