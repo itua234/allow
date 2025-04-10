@@ -1,4 +1,4 @@
-import { Sequelize, DataTypes, Model, InferAttributes, InferCreationAttributes } from 'sequelize';
+import { Sequelize, Model, InferAttributes, InferCreationAttributes } from 'sequelize';
 
 // Define the PermissionAttributes interface
 interface PermissionAttributes extends Model<InferAttributes<PermissionAttributes>, InferCreationAttributes<PermissionAttributes>> {
@@ -10,6 +10,7 @@ interface PermissionAttributes extends Model<InferAttributes<PermissionAttribute
     granted_at: Date;
     revoked_at: Date;
     status: 'ACTIVE' | 'REVOKED';
+    granted: boolean;
 }
 
 // Define the PermissionModelStatic type
@@ -50,7 +51,11 @@ module.exports = (sequelize: Sequelize, DataTypes: typeof import('sequelize').Da
         status: {
             type: DataTypes.ENUM('ACTIVE', 'REVOKED'),
             defaultValue: 'ACTIVE'
-        }
+        },
+        granted: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
+        },
     }, {
         tableName: 'permissions',
         timestamps: true,

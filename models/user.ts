@@ -4,20 +4,21 @@ const { encrypt, decrypt } = require('@util/helper');
 export default interface UserAttributes extends Model<InferAttributes<UserAttributes>, InferCreationAttributes<UserAttributes>> {
     id: string;
     //id: CreationOptional<number>;
-    firstname: string;
-    lastname: string;
+    name: string;
     email: string;
     phone: string;
     dob: string;
     verified: boolean;
     verified_at: Date;
     status: 'PENDING' | 'VERIFIED' | 'REJECTED';
-    photo?: string;
     address?: string;
-    country?: string;
-    state?: string;
-    city?: string;
-    zip_code?: string;
+    is_blacklisted: string
+
+    // photo?: string;
+    // country?: string;
+    // state?: string;
+    // city?: string;
+    // zip_code?: string;
 }
 
 type UserModelStatic = typeof Model & {
@@ -28,30 +29,16 @@ type UserModelStatic = typeof Model & {
 module.exports = (sequelize: Sequelize, DataTypes: typeof import('sequelize').DataTypes) => {
     const User = <UserModelStatic>sequelize.define('User', {
         id: {type: DataTypes.UUID, primaryKey: true, defaultValue: DataTypes.UUIDV4},
-        firstname: {
+        name: {
             type: DataTypes.STRING,
             allowNull: false,
             get() {
-                const encryptedValue = this.getDataValue('firstname');
+                const encryptedValue = this.getDataValue('name');
                 return encryptedValue ? decrypt(encryptedValue) : null;
             },
             set(value: string) {
                 value = value.toLowerCase();
-                value = value.charAt(0).toUpperCase() + value.slice(1);
-                this.setDataValue('firstname', encrypt(value));
-            }
-        },
-        lastname: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            get() {
-                const encryptedValue = this.getDataValue('lastname');
-                return encryptedValue ? decrypt(encryptedValue) : null;
-            },
-            set(value: string) {
-                value = value.toLowerCase();
-                value = value.charAt(0).toUpperCase() + value.slice(1);
-                this.setDataValue('lastname', encrypt(value));
+                this.setDataValue('name', encrypt(value));
             }
         },
         email: {
@@ -101,26 +88,27 @@ module.exports = (sequelize: Sequelize, DataTypes: typeof import('sequelize').Da
             type: DataTypes.ENUM('PENDING', 'VERIFIED', 'REJECTED'),
             defaultValue: 'PENDING'
         },
-
-        photo: {type: DataTypes.STRING, allowNull: true},
         address: {type: DataTypes.TEXT, allowNull: true},
-        country: {type: DataTypes.STRING, allowNull: true},
-        state: {type: DataTypes.STRING, allowNull: true},
-        city: {type: DataTypes.STRING, allowNull: true},
-        zip_code: {type: DataTypes.STRING, allowNull: true}
+        is_blacklisted: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
+            get() {
+                return Boolean(this.getDataValue('is_blacklisted'));
+            }
+        },
+
+        // photo: {type: DataTypes.STRING, allowNull: true},
+        // country: {type: DataTypes.STRING, allowNull: true},
+        // state: {type: DataTypes.STRING, allowNull: true},
+        // city: {type: DataTypes.STRING, allowNull: true},
+        // zip_code: {type: DataTypes.STRING, allowNull: true}
     },{
         hooks: {
             beforeCreate: async (user) => {
-                // if(user.password){
-                //     const salt = await bcrypt.genSalt(10);
-                //     user.password = await bcrypt.hash(user.password, salt);
-                // };
+               
             },
             beforeUpdate: async (user) => {
-                // if(user.changed('password')){
-                //     const salt = await bcrypt.genSalt(10);
-                //     user.password = await bcrypt.hash(user.password, salt);
-                // }
+                
             }
         },
         tableName: 'users',
