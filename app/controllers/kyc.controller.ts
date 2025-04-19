@@ -1,29 +1,12 @@
 import express, { Request as ExpressRequest, NextFunction, Response } from 'express';
 //const { cloudinaryUpload, uploadToBlob } = require('../../services/cloudinary');
-const { models: { Request, Customer } } = require('@models').default;
+const { sequelize, models: { Request, Customer, Document } } = require('@models').default;
 import crypto from 'crypto';
 const { encrypt, decrypt } = require('@util/helper');
+import { Transaction } from 'sequelize';
 
-/**
- * Initiates a KYC process.
- * @param {object} req.body - The request body containing KYC initiation details.
- * @param {object} req.body.customer - Information about the customer.
- * @param {string} req.body.customer.name - The name of the customer.
- * @param {string} req.body.customer.email - The email address of the customer.
- * @param {string} req.body.customer.address - The address of the customer.
- * @param {object} req.body.customer.identity - Identity information of the customer.
- * @param {string} req.body.customer.identity.number - The identity number.
- * @param {string} req.body.customer.identity.type - The type of identity (e.g., "bvn").
- * @param {string} req.body.reference - Unique reference for this KYC request.
- * @param {string} req.body.redirect_url - URL to redirect the user after KYC completion.
- * @param {string} req.body.kyc_level - The desired KYC level for the customer.
- * @param {boolean} req.body.bank_accounts - A boolean that determines if bank details should be verified.
- * @param {ExpressRequest} req - The Express request object.
- * @param {Response} res - The Express response object.
- * @returns {Promise<void>} - Returns a JSON response indicating the success or failure of the initiation.
-*/
 exports.initiate = async(req: ExpressRequest, res: Response) => {
-    // return res.json(req.body);
+    return res.json(await Customer.findByPk("2f19f5a9-b4f0-4c37-9fb9-786933c50864"))
     const {
         customer,
         reference,
@@ -35,86 +18,52 @@ exports.initiate = async(req: ExpressRequest, res: Response) => {
         const identityString = `${customer.identity_type}:${customer.identity_number}`;
         const identityHash = crypto.createHash('sha256').update(identityString).digest('hex');
         const kyc_token = crypto.randomBytes(24).toString('hex');
+        // Create request and customer atomically
+        const result = await sequelize.transaction(async (t: Transaction) => {
+            const request = await Request.create({
+                company_id: (req.app as any).company_id,
+                reference,
+                redirect_url,
+                kyc_level,
+                bank_accounts,
+                kyc_token: kyc_token,
+                token_expires_at: new Date(Date.now() + 3600 * 1000), // 1 hour from now
+            }, { transaction: t });
 
-        const request = await Request.create({
-            company_id: (req.app as any).company_id,
-            reference,
-            redirect_url,
-            kyc_level,
-            bank_accounts,
-            kyc_token: kyc_token,
-            //allow_url: `https://api.allow.com/${token}`,
-            token_expires_at: new Date(Date.now() + 3600 * 1000), // 1 hour from now
-        });
+            let existingCustomer = await findExistingCustomer(customer, t);
 
-        return res.json(request);
+            if (existingCustomer) {
+                await request.update({
+                    customer_id: existingCustomer.id
+                }, { transaction: t });
 
-        let existingCustomer = null;
-        // 1. Search by primary identifiers (if available)
-        if (customer.email || customer.phone) {
-            const query: Record<string, any> = {};
-            customer.email && (query.email = encrypt(customer.email));
-            customer.phone && (query.phone = encrypt(customer.phone));
-            
-            existingCustomer = await Customer.findOne({
-                where: query
-            });
-        }
-
-        if(!existingCustomer){
-            if (customer.identity_type === 'NIN') {
-                let hash = generateIdentityHash('NIN', customer.identity_number);
-                
-                existingCustomer = await Customer.findOne({
-                    attributes: ['id', 'name', 'email'], // Specify Customer attributes
-                    include: [{
-                        model: Document,
-                        where: { identity_hash: hash },
-                        required: true,
-                        attributes: ['identity_type', 'identity_number', 'verified']
-                    }]
-                });
-            } else if(customer.identity_type === 'BVN'){
-                let hash = generateIdentityHash('BVN', customer.identity_number);
-                
-                existingCustomer = await Customer.findOne({
-                    attributes: ['id', 'name', 'email'], // Specify Customer attributes
-                    include: [{
-                        model: Document,
-                        where: { identity_hash: hash },
-                        required: true,
-                        attributes: ['identity_type', 'identity_number', 'verified']
-                    }]
-                });
+                return { request, customer: existingCustomer };
             }
-        }
 
-        if (existingCustomer) {
+            const newCustomer = await Customer.create({
+                name: customer.name ? encrypt(customer.name) : null,
+                email: customer.email ? encrypt(customer.email) : null,
+            }, { transaction: t });
+
+            // Create the initial document
+            await Document.create({
+                customer_id: newCustomer.id,
+                identity_type: customer.identity.type.toUpperCase(),
+                identity_number: customer.identity.number,
+                identity_hash: identityHash,
+                verified: false
+            }, { transaction: t });
+
             await request.update({
-                customer_id: existingCustomer.id
-            });
-        }
+                customer_id: newCustomer.id
+            }, { transaction: t });
 
-        
-        // Create new customer if not found
-        const newCustomer = await Customer.create({
-            name: customer.name,
-            email: customer.email,
-            phone: customer.phone,
-            dob: customer.dob,
-            identity_type: customer.identity_type,
-            identity_number: customer.identity_number,
-            identity_hash: identityHash
-        });
-        // Link customer to request
-        await request.update({
-            customer_id: newCustomer.id
+            return { request, customer: newCustomer };
         });
 
         return res.status(200).json({
             message: 'KYC process initiated successfully',
-            request_id: request.id,
-            kyc_token,
+            results: result,
             error: false
         });
     } catch (error) {
@@ -126,6 +75,59 @@ exports.initiate = async(req: ExpressRequest, res: Response) => {
     }
 }
 
+async function findExistingCustomer(customer: any, transaction: Transaction) {
+    const identityHash = generateIdentityHash(
+        customer.identity.type.toUpperCase(),
+        customer.identity.number
+    );
+
+    // First try to find by the current identity document
+    const existingDocument = await Document.findOne({
+        where: { 
+            identity_type: customer.identity.type.toUpperCase(),
+            identity_number: customer.identity.number
+        },
+        include: [{
+            model: Customer,
+            as: "customer",
+            attributes: ['id', 'name', 'email']
+        }],
+        transaction
+    });
+
+    if (existingDocument?.Customer) {
+        return existingDocument.Customer;
+    }
+
+    // If not found by current identity, check if customer exists with other identity types
+    if (customer.email) {
+        const customerByEmail = await Customer.findOne({
+            where: { email: encrypt(customer.email) },
+            include: [{
+                model: Document,
+                required: true,
+                as: "documents",
+                attributes: ['identity_type', 'identity_number', 'verified']
+            }],
+            transaction
+        });
+
+        if (customerByEmail) {
+            // Create new document for existing customer
+            await Document.create({
+                customer_id: customerByEmail.id,
+                identity_type: customer.identity.type.toUpperCase(),
+                identity_number: customer.identity.number,
+                identity_hash: identityHash,
+                verified: false
+            }, { transaction });
+
+            return customerByEmail;
+        }
+    }
+
+    return null;
+}
 
 
 /**
@@ -138,26 +140,3 @@ function generateIdentityHash(type: string, number: string) {
     const identityString = `${type}:${number}`;
     return crypto.createHash('sha256').update(identityString).digest('hex');
 }
-
-// /**
-//  * Attempts to find an existing customer by identity hash, trying both BVN and NIN.
-//  * @param {Object} customer - The customer data from the KYC request.
-//  * @returns {Promise<Customer|null>} Found customer or null.
-//  */
-// async function findExistingCustomer(customer) {
-//     const primaryHash = generateIdentityHash(customer.identity_type, customer.identity_number);
-//     let existingCustomer = await Customer.findOne({ where: { identity_hash: primaryHash } });
-  
-//     if (!existingCustomer) {
-//       // Try alternate identity
-//       if (customer.identity_type === 'NIN' && customer.bvn) {
-//         const bvnHash = generateIdentityHash('BVN', customer.bvn);
-//         existingCustomer = await Customer.findOne({ where: { identity_hash: bvnHash } });
-//       } else if (customer.identity_type === 'BVN' && customer.nin) {
-//         const ninHash = generateIdentityHash('NIN', customer.nin);
-//         existingCustomer = await Customer.findOne({ where: { identity_hash: ninHash } });
-//       }
-//     }
-  
-//     return existingCustomer;
-//   }

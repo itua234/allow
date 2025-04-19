@@ -27,8 +27,15 @@ module.exports = (sequelize: Sequelize, DataTypes: typeof import('sequelize').Da
             type: DataTypes.STRING,
             allowNull: false,
             get() {
-                const encryptedValue = this.getDataValue('name');
-                return encryptedValue ? decrypt(encryptedValue) : null;
+                try {
+                    const encryptedValue = this.getDataValue('name');
+                    if (!encryptedValue) return null;
+                    const decryptedValue = decrypt(encryptedValue);
+                    return decryptedValue;
+                } catch (error) {
+                    console.error('Decryption error:', error);
+                    return null;
+                }
             },
             set(value: string) {
                 value = value.toLowerCase();
@@ -103,7 +110,10 @@ module.exports = (sequelize: Sequelize, DataTypes: typeof import('sequelize').Da
 
     Customer.associate = (models) => {
         Customer.hasMany(models.Permission);
-        Customer.hasMany(models.Document);
+        Customer.hasMany(models.Document, {
+            foreignKey: 'customer_id',
+            as: 'documents'
+        });
     };
 
     return Customer;

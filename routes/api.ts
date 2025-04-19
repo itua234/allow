@@ -43,18 +43,6 @@ router.get('/', (req: Request, res: Response) => {
 
 router.post('/allow/initiate', [authMiddleware.authenticateAppBySecretKey], kycController.initiate);
 
-// router.post('/allow/initiate', [authMiddleware.authenticateAppBySecretKey], async function (req: Request, res: Response) {
-//     //const redisClient = await initializeRedisClient(); // Wait for the client to be ready
-//     await client.set('davido', '5ive'); // Use the Redis client correctly here
-//     const prefix = 're'; // Your custom prefix
-//     const randomPart = Math.random().toString(36).substring(2, 10).toUpperCase();
-//     const timestampPart = Date.now().toString(36).substring(4, 7);
-//     //return `${prefix}${randomPart}${timestampPart}`;
-//     res.json({
-//         message: 'Customer payload is valid!',
-//         data: `${prefix}${randomPart}${timestampPart}`,
-//     });
-// });
 router.get('/allow/customers', function (req: Request, res: Response) {
     res.json({
         status: 'ok',
@@ -91,7 +79,6 @@ router.post('/allow/customers/whitelist', function (req: Request, res: Response)
         version: '1.1.0'
     });
 });
-// const kycController = require('../controllers/kycController');
 
 // router.post('/initiate', kycController.initiateKYC);
 // router.post('/verify-phone', kycController.verifyPhone);
