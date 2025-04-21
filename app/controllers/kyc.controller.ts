@@ -6,6 +6,12 @@ const { encrypt, decrypt } = require('@util/helper');
 import { Transaction } from 'sequelize';
 
 exports.initiate = async(req: ExpressRequest, res: Response) => {
+    let name = "Lekan Osifeso";
+    let encrypted = encrypt(name);
+    return res.json({
+        encrypted,
+        decrypted: decrypt(encrypted)
+    });
     return res.json(await Customer.findByPk("2f19f5a9-b4f0-4c37-9fb9-786933c50864"))
     const {
         customer,

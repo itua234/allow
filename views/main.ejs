@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 400px;
+            position: relative;
+        }
+
+        .close-button {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .mono-logo {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .feature-list {
+            margin: 30px 0;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .feature-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 15px;
+        }
+
+        .feature-text {
+            font-size: 14px;
+        }
+
+        .feature-text strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .link-button {
+            background-color: #0066f5;
+            color: white;
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .footer-text {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .footer-text a {
+            color: #0066f5;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-button">×</button>
+            
+            <div class="modal-header">
+                <img src="mono-logo.png" alt="Mono" class="mono-logo">
+                <div class="title">
+                    <strong>Getequity</strong> uses Mono
+                    <div>to link your account</div>
+                </div>
+            </div>
+
+            <div class="feature-list">
+                <div class="feature-item">
+                    <img src="trust-icon.png" alt="" class="feature-icon">
+                    <div class="feature-text">
+                        <strong>Trust</strong>
+                        Over 100 businesses trust Mono to securely connect to financial institutions
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <img src="private-icon.png" alt="" class="feature-icon">
+                    <div class="feature-text">
+                        <strong>Private</strong>
+                        Your credentials are safe and will never be made accessible to Getequity
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <img src="secure-icon.png" alt="" class="feature-icon">
+                    <div class="feature-text">
+                        <strong>Secure</strong>
+                        Mono uses (AES-256) encryption technology to help safeguard your data
+                    </div>
+                </div>
+            </div>
+
+            <button class="link-button">Link account</button>
+
+            <div class="footer-text">
+                By clicking 'Link account' you agree to Mono's <a href="#">End-user Policy</a>.<br>
+                Mono will have read-only access to your account. <a href="#">See details</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -24,7 +24,7 @@ module.exports = (sequelize: Sequelize, DataTypes: typeof import('sequelize').Da
     const Customer = <CustomerModelStatic>sequelize.define('Customer', {
         id: { type: DataTypes.UUID, primaryKey: true, defaultValue: DataTypes.UUIDV4 },
         name: {
-            type: DataTypes.STRING,
+            type: DataTypes.TEXT,
             allowNull: false,
             get() {
                 try {
@@ -38,12 +38,11 @@ module.exports = (sequelize: Sequelize, DataTypes: typeof import('sequelize').Da
                 }
             },
             set(value: string) {
-                value = value.toLowerCase();
                 this.setDataValue('name', encrypt(value));
             }
         },
         email: {
-            type: DataTypes.STRING,
+            type: DataTypes.TEXT,
             unique: true,
             allowNull: false,
             get() {
@@ -55,7 +54,7 @@ module.exports = (sequelize: Sequelize, DataTypes: typeof import('sequelize').Da
             }
         },
         phone: {
-            type: DataTypes.STRING,
+            type: DataTypes.TEXT,
             unique: true,
             allowNull: true,
             get() {
@@ -68,7 +67,7 @@ module.exports = (sequelize: Sequelize, DataTypes: typeof import('sequelize').Da
         },
         phone_verified_at: { type: DataTypes.DATE, allowNull: true },
         dob: {
-            type: DataTypes.STRING,
+            type: DataTypes.TEXT,
             allowNull: true,
             get() {
                 const encryptedValue = this.getDataValue('dob');
@@ -99,6 +98,15 @@ module.exports = (sequelize: Sequelize, DataTypes: typeof import('sequelize').Da
             }
         },
     }, {
+        hooks: {
+            // afterFind: (customers: CustomerAttributes[]) => {
+            //     if (!Array.isArray(customers)) customers = [customers];
+            //     customers.forEach((customer: CustomerAttributes) => {
+            //         customer.email = decrypt(customer.email);
+            //         customer.phone = decrypt(customer.phone);
+            //     });
+            // }
+        },
         tableName: 'customers',
         timestamps: true,
         createdAt: 'created_at',

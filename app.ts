@@ -84,6 +84,18 @@ db.sequelize.authenticate()
 function useRoutes(): void {
   // Apply rate limiter to API routes
   app.use('/api', limiter);
+
+  // app.use((req, res, next) => {
+  //   res.setHeader("Content-Security-Policy", "script-src 'self' http://127.0.0.1:8080");
+  //   next();
+  // });
+  app.use((req, res, next) => {
+    res.setHeader(
+        "Content-Security-Policy",
+        "script-src 'self' http://127.0.0.1:8080 'unsafe-inline'"
+    );
+    next();
+});
   
   // Health check endpoint
   app.get('/health', (req: Request, res: Response) => {
@@ -166,9 +178,12 @@ function useRoutes(): void {
       ]
     }
     
-    res.render('index', {
+    res.render('allow', {
       user: user,
     });
+  });
+  app.get('/test-modal', async (req: Request, res: Response) => {
+    res.render('main');
   });
 
   // Main routes
