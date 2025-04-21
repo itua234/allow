@@ -58,7 +58,14 @@
         }
 
         open() {
-            alert("spark");
+            //alert("spark");
+            // Create a new browser window
+            const windowFeatures = 'width=600,height=600,resizable=yes,scrollbars=yes,status=yes';
+            const verificationWindow = window.open(
+                'http://127.0.0.1:8080/test-modal',
+                'KYC Verification',
+                windowFeatures
+            );
             // Create and show modal with iframe
             if (!this.modal) {
                 this.modal = document.createElement('div');

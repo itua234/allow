@@ -146,6 +146,38 @@ const url = new URL(referrer);
 const origin = url.origin;
 window.parent.postMessage({ type: 'KYC_SUCCESS', data: { ... } }, origin);
 
+## Trae AI
+Used 1 context
+
+You can modify the open() method to use window.open() instead of an iframe. Here's how to change your code:
+
+```javascript
+open() {
+    // Create a new browser window
+    const windowFeatures = 'width=600,height=700,resizable=yes,scrollbars=yes,status=yes';
+    const verificationWindow = window.open(
+        'http://127.0.0.1:8080/test-modal',
+        'KYC Verification',
+        windowFeatures
+    );
+
+    if (typeof this.options.onEvent === 'function') {
+        this.options.onEvent('MODAL_OPENED');
+    }
+
+    // Setup message listener for the new window
+    this.setupMessageListener();
+}
+
+// You can also remove the modal-related CSS in setup() since we're not using it anymore
+setup() {
+    if (typeof this.options.onLoad === 'function') {
+        this.options.onLoad();
+    }
+}
+ ```
+```
+
 
 
 this.publicKey = publicKey;
