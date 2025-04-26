@@ -87,6 +87,14 @@ h1,.h1,h2,.h2,h3,.h3,h4,.h4,h5,.h5,h6,.h6{
     cursor: pointer;
 }
 
+.content-box {
+    overflow: hidden;
+    position: relative;
+    min-height: 400px; /* Consistent height for all steps */
+    display: flex;
+    flex-direction: column;
+}
+
 /* .modal-header {
     text-align: center;
     margin-bottom: 30px;
@@ -103,18 +111,18 @@ h1,.h1,h2,.h2,h3,.h3,h4,.h4,h5,.h5,h6,.h6{
     margin-bottom: 10px;
 } */
 
-.feature-list {
+/* .feature-list {
     margin: 20px 0;
     padding: 20px 25px;
     border-radius: 8px;
     border: 1px solid #ccc;
-}
+} */
 
-.feature-item {
+/* .feature-item {
     display: flex;
     align-items: center;
     margin-bottom: 15px;
-}
+} */
 
 .feature-icon {
     width: 24px;
@@ -144,7 +152,7 @@ h1,.h1,h2,.h2,h3,.h3,h4,.h4,h5,.h5,h6,.h6{
 }
 
 .footer-text {
-    font-size: 12px;
+    font-size: 11px;
     color: #666;
     text-align: center;
     margin-top: 15px;

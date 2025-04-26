@@ -3,6 +3,7 @@
 // const User = require("../models").User;
 //const { encrypt } = require('../app/util/helper');
 const crypto = require("crypto");
+const {faker} = require("@faker-js/faker");
 const { v4: uuidv4 } = require('uuid'); // Add this for UUID generation
 //const ENCRYPTION_KEY = crypto.randomBytes(32).toString('hex'); // 32 bytes (64 characters in hex)
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY 
@@ -44,38 +45,27 @@ function decryptDeterministic(encryptedText) {
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   up: async (queryInterface) => {
-    return queryInterface.bulkInsert('customers', [
-      {
-        id: uuidv4(),
-        name: encrypt('John Doe'), // Encrypting the name
-        email: encrypt('johndoe@example.com'), // Encrypting the email
-        phone: encrypt('1234567890'), // Encrypting the phone
-        phone_verified_at: null,
-        dob: encrypt('1990-01-01'), // Encrypting the date of birth
-        verified: true,
-        verified_at: new Date(),
-        status: 'VERIFIED',
-        address: '123 Main Street, Lagos',
-        is_blacklisted: false,
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-      {
-        id: uuidv4(),
-        name: encrypt('Jane Smith'),
-        email: encrypt('janesmith@example.com'),
-        phone: encrypt('0987654321'),
-        phone_verified_at: new Date(),
-        dob: encrypt('1985-05-15'),
-        verified: false,
-        verified_at: null,
-        status: 'PENDING',
-        address: '456 Elm Street, Abuja',
-        is_blacklisted: false,
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-    ]);
+    const customers = Array.from({ length: 5 }, () => ({
+      //id: uuidv4(),
+      id: faker.string.uuid(),
+      name: encrypt(faker.person.fullName()),
+      email: encrypt(faker.internet.email()),
+      phone: encrypt(faker.phone.number()),
+      phone_verified_at: null,
+      dob: encrypt(faker.date.birthdate().toISOString()),
+      verified: faker.datatype.boolean(),
+      verified_at: new Date(),
+      status: faker.helpers.arrayElement(['VERIFIED', 'PENDING']),
+      address: encrypt(faker.location.streetAddress()),
+      is_blacklisted: faker.datatype.boolean(),
+      created_at: new Date(),
+      updated_at: new Date(),
+      // searchable_name: encryptDeterministic(faker.person.fullName()),
+      // searchable_email: encryptDeterministic(faker.internet.email()),
+      // searchable_phone: encryptDeterministic(faker.phone.number()),
+      // searchable_address: encryptDeterministic(faker.location.streetAddress()),
+    }));
+    return queryInterface.bulkInsert('customers', customers);
   },
 
   down: async (queryInterface) => {
