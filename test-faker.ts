@@ -10,7 +10,7 @@ console.log('\nPerson Methods:', Object.keys(faker.person));
 console.log('\nInternet Methods:', Object.keys(faker.internet));
 
 // Example: Explore date methods
-console.log('\nDate Methods:', Object.keys(faker.date));
+console.log('\nDate Methods:', Object.keys(faker.company));
 
 // - faker.person - names, gender, etc.
 // - faker.internet - emails, usernames, passwords

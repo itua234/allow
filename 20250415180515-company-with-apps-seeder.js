@@ -33,7 +33,7 @@ module.exports = {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash("Reckless@3030", salt);
     // Create companies
-    const companies = await queryInterface.bulkInsert(
+    await queryInterface.bulkInsert(
       'companies',
       [
         {
@@ -98,7 +98,6 @@ module.exports = {
     for (const key of keys) {
       await client.del(key); // Delete each key
     }
-
     // Delete data from the database
     await queryInterface.bulkDelete('apps', null, {});
     await queryInterface.bulkDelete('companies', null, {});
