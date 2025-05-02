@@ -7,7 +7,10 @@ import dotenv from 'dotenv';
 dotenv.config(); // Load environment variables
 import 'module-alias/register';
 // import './app/services/queues';
-//import { createClient } from "redis";
+//const client = require("@util/client");
+// client.connect()
+//   .then(() => console.log('Client connected successfully'))
+//   .catch((err: Error) => console.error('Failed to connect client:', err));
 
 // Import modules with proper types
 import db from './models'
@@ -31,7 +34,7 @@ app.use(cors({
   origin: process.env.NODE_ENV === 'production'
     ? process.env.ALLOWED_ORIGINS?.split(',')
     : '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   credentials: true
 }));
 
@@ -51,34 +54,37 @@ const { PORT, NODE_ENV } = process.env;
 process.on('uncaughtException', (error: Error) => {
   console.error('FATAL ERROR 💥', error);
 });
-
 process.on('unhandledRejection', (error: Error) => {
   console.error('UNHANDLED REJECTION 💥', error);
 });
-
+// Add this for graceful shutdown
 process.on('SIGTERM', () => {
   console.log('👋 SIGTERM RECEIVED.');
 });
 
-// Database synchronization options
-const syncOptions = NODE_ENV == "development" ? {} : { alter: false };
+// Start the server
+async function startServer() {
+  try {   
+    // Always authenticate first
+    await db.sequelize.authenticate();
+    console.log('Connection has been established successfully.');
+    // Only authenticate on first start, not on every reload
+    if (!db.sequelize.connectionManager.hasOwnProperty('getConnection')) {
+      if (process.env.FORCE_DB_SYNC === 'true') {
+        const syncOptions = NODE_ENV == "development" ? {} : { alter: false };
+        await db.sequelize.sync(syncOptions);
+        console.log('Connection has been established successfully.');
+      }
+    }
 
-// Connect to database and start server
-db.sequelize.authenticate()
-.then(() => {
-  console.log('Connection has been established successfully.');
-  return db.sequelize.sync(syncOptions);
-})
-.then(() => {
-  console.log('Database synchronized');
-  app.listen(PORT, () => {
-    console.log(`[START] Server running on Port: ${PORT}`);
-  });
-  useRoutes();
-})
-.catch((err: Error) => {
-  console.error('Unable to connect to the database:', err);
-});
+    app.listen(PORT, () => {
+      console.log(`[START] Server running on Port: ${PORT}`);
+    });
+    useRoutes();
+  } catch (err) {
+    console.error('Unable to connect to the database:', err);
+  }
+}
 
 // Routes configuration
 function useRoutes(): void {
@@ -199,4 +205,5 @@ function useRoutes(): void {
   app.use(globalErrorHandler);
 }
 
+startServer();
 export default app;

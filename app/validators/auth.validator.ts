@@ -167,3 +167,14 @@ export default {
         }
     },
 }
+// {
+//     reference: 'required|string',
+//     redirect_url: 'required|string|url',
+//     kyc_level: 'required|string|in:tier_1,tier_2,tier_3',
+//     bank_accounts: 'required|boolean',
+//     'customer.name': 'required|string',
+//     'customer.email': 'required|string|email',
+//     'customer.address': 'required|string',
+//     'customer.identity.type': 'required|string|in:BVN,NIN',
+//     'customer.identity.number': 'required|string',
+// }

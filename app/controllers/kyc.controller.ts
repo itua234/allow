@@ -4,15 +4,19 @@ const { sequelize, models: { Request, Customer, Document } } = require('@models'
 import crypto from 'crypto';
 const { encrypt, decrypt } = require('@util/helper');
 import { Transaction } from 'sequelize';
+import { ref } from 'process';
+const tokenVaultService = require('@services/tokenVaultService');
+
+function generateToken() {
+    return crypto.randomBytes(24).toString('hex'); // Generate a 64-character hex token
+}
+// Function to generate a unique hash for the identity document
+function generateIdentityHash(type: string, number: string) {
+    const identityString = `${type}:${number}`;
+    return crypto.createHash('sha256').update(identityString).digest('hex');
+}
 
 exports.initiate = async(req: ExpressRequest, res: Response) => {
-    let name = "Lekan Osifeso";
-    let encrypted = encrypt(name);
-    return res.json({
-        encrypted,
-        decrypted: decrypt(encrypted)
-    });
-    return res.json(await Customer.findByPk("2f19f5a9-b4f0-4c37-9fb9-786933c50864"))
     const {
         customer,
         reference,
@@ -21,9 +25,7 @@ exports.initiate = async(req: ExpressRequest, res: Response) => {
         bank_accounts,
     } = req.body;
     try{
-        const identityString = `${customer.identity_type}:${customer.identity_number}`;
-        const identityHash = crypto.createHash('sha256').update(identityString).digest('hex');
-        const kyc_token = crypto.randomBytes(24).toString('hex');
+        const kyc_token = generateToken();
         // Create request and customer atomically
         const result = await sequelize.transaction(async (t: Transaction) => {
             const request = await Request.create({
@@ -36,40 +38,26 @@ exports.initiate = async(req: ExpressRequest, res: Response) => {
                 token_expires_at: new Date(Date.now() + 3600 * 1000), // 1 hour from now
             }, { transaction: t });
 
-            let existingCustomer = await findExistingCustomer(customer, t);
+            // Store the token mapping securely
+            await tokenVaultService.storeToken(kyc_token, customer);
 
-            if (existingCustomer) {
-                await request.update({
-                    customer_id: existingCustomer.id
-                }, { transaction: t });
-
-                return { request, customer: existingCustomer };
-            }
-
-            const newCustomer = await Customer.create({
-                name: customer.name ? encrypt(customer.name) : null,
-                email: customer.email ? encrypt(customer.email) : null,
-            }, { transaction: t });
-
-            // Create the initial document
-            await Document.create({
-                customer_id: newCustomer.id,
-                identity_type: customer.identity.type.toUpperCase(),
-                identity_number: customer.identity.number,
-                identity_hash: identityHash,
-                verified: false
-            }, { transaction: t });
-
-            await request.update({
-                customer_id: newCustomer.id
-            }, { transaction: t });
-
-            return { request, customer: newCustomer };
+            return { request, customer };
         });
+
+        const data = {
+            "id": result.request.id,
+            "customer": result.request.kyc_token,
+            "allow_url": result.request.allow_url,
+            reference: result.request.reference,
+            "redirect_url": result.request.redirect_url,
+            "bank_accounts": result.request.bank_accounts,
+            "kyc_level": result.request.kyc_level,
+            is_blacklisted: false
+        };
 
         return res.status(200).json({
             message: 'KYC process initiated successfully',
-            results: result,
+            results: data,
             error: false
         });
     } catch (error) {
@@ -135,14 +123,3 @@ async function findExistingCustomer(customer: any, transaction: Transaction) {
     return null;
 }
 
-
-/**
- * Generates a SHA-256 hash for the given identity.
- * @param {string} type - The type of identity, e.g., "BVN" or "NIN".
- * @param {string} number - The identity number.
- * @returns {string} Hashed identity string.
-*/
-function generateIdentityHash(type: string, number: string) {
-    const identityString = `${type}:${number}`;
-    return crypto.createHash('sha256').update(identityString).digest('hex');
-}

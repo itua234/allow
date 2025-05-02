@@ -20,27 +20,16 @@
     </style>
     <body>
         <div class="modal-overlayy">
-            <div class="modal-content bg-white rounded-3 position-relative" style="max-width:400px;max-height:500px;overflow:scroll;padding: 30px 15px !important">
-                <div class="">
-                    <img src="mono-logo.png" alt="Allow" class="mono-logo">
-                    <button class="close-button">×</button>
+            <div class="al-modal-content bg-white rounded-3">
+                <div class="" style="">
+                    <!-- <img src="mono-logo.png" alt="Allow" class="mono-logo">
+                    <button class="close-button"></button> -->
                 </div>
 
                 <div class="content-box position-relative">
                     <%- include('steps/intro') %>
                     <%- include('steps/step1') %>
                     <%- include('steps/step2') %>
-
-                    <div class="" id="step3">
-                        <div class="text-center">
-                            <h3 class="">
-                                Enter your email address
-                            </h3>
-                        </div>
-                        <div class="mb-4">
-                            <input type="text" class="form-control" id="emailInput" placeholder="Enter email address">
-                        </div>
-                    </div>
                 </div>
 
             </div>
@@ -77,15 +66,15 @@
                 // $(".link-button").click(function() {
                 //     showStep("#intro", "#step1");
                 // });
-                $("#intro .link-button").click(function() {
+                $("#intro .al-primary-button").click(function() {
                     showStep("#intro", "#step1");
                 });
 
-                $("#step1 .link-button").click(function() {
+                $("#step1 .al-primary-button").click(function() {
                     showStep("#step1", "#step2");
                 });
 
-                $("#step2 .link-button").click(function() {
+                $("#step2 .al-primary-button").click(function() {
                     showStep("#step2", "#step3");
                 });
             });

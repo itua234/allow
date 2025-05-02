@@ -15,7 +15,7 @@
     --bs-white: #fff;
     --bs-gray: #7d879c;
     --bs-gray-dark: #373f50;
-    --bs-primary: #233E83;
+    --bs-primary: #222831;
     --bs-accent: #4e54c8;
     --bs-secondary: #F79D1D;
     --bs-success: #42d697;
@@ -44,6 +44,7 @@ body{
     background-color:#fff; */
     -webkit-text-size-adjust:100%;
     -webkit-tap-highlight-color:rgba(0,0,0,0);
+    color: var(--bs-primary);
 }
 h1,.h1,h2,.h2,h3,.h3,h4,.h4,h5,.h5,h6,.h6{
     margin-top:0;
@@ -69,18 +70,17 @@ h1,.h1,h2,.h2,h3,.h3,h4,.h4,h5,.h5,h6,.h6{
     z-index: 1000;
 }
 
-.modal-content {
+.al-modal-content {
     background: white;
-    padding: 30px 15px;
     border-radius: 12px;
     width: 400px;
     position: relative;
+    max-height:500px;
+    overflow-y:auto;
+    padding: 15px 15px !important
 }
 
 .close-button {
-    position: absolute;
-    right: 20px;
-    top: 20px;
     background: none;
     border: none;
     font-size: 20px;
@@ -131,7 +131,7 @@ h1,.h1,h2,.h2,h3,.h3,h4,.h4,h5,.h5,h6,.h6{
 }
 
 .feature-text {
-    font-size: 12px;
+    font-size: 11px;
 }
 
 .feature-text strong {
@@ -139,8 +139,8 @@ h1,.h1,h2,.h2,h3,.h3,h4,.h4,h5,.h5,h6,.h6{
     margin-bottom: 4px;
 }
 
-.link-button {
-    background-color: #0066f5;
+.al-primary-button {
+    background-color: #222831;
     color: white;
     width: 100%;
     padding: 15px;
@@ -148,14 +148,14 @@ h1,.h1,h2,.h2,h3,.h3,h4,.h4,h5,.h5,h6,.h6{
     border-radius: 8px;
     font-size: 16px;
     cursor: pointer;
-    margin-top: 20px;
+    margin-top: 10px;
 }
 
 .footer-text {
     font-size: 11px;
+    color: var(--bs-primary);
     color: #666;
     text-align: center;
-    margin-top: 15px;
 }
 
 .footer-text a {

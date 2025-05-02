@@ -27,3 +27,7 @@ yarn-error.*
 
 dump.js
 secret-key.js
+tokenize.js
+./old-data*
+./old-data
+./old-data/*

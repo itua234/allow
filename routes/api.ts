@@ -11,9 +11,7 @@ const kycController = require('@controllers/kyc.controller');
 // Configure multer for file uploads
 const storage: StorageEngine = multer.memoryStorage();;
 const upload = multer({ storage: storage });
-const client = require("@util/client");
-
-const {faker} = require("@faker-js/faker");
+//const client = require("@util/client");
 
 // Middleware to handle multer errors
 const handleMulterError = (err: any, req: Request, res: Response, next: NextFunction) => {
@@ -46,19 +44,7 @@ router.get('/', (req: Request, res: Response) => {
 router.post('/allow/initiate', [authMiddleware.authenticateAppBySecretKey], kycController.initiate);
 
 router.get('/allow/customers', function (req: Request, res: Response) {
-    const users = Array.from({ length: 5 }, () => ({
-        id: faker.string.uuid(),
-        firstname: faker.person.firstName(),
-        lastname: faker.person.lastName(),
-        username: faker.internet.username(), // note: userName instead of username
-        phone: faker.phone.number(),
-        email: faker.internet.email(),
-        avatar: faker.image.avatar(),
-        password: faker.internet.password(),
-        birthdate: faker.date.birthdate(),
-        registeredAt: faker.date.past(),
-    }));
-    res.json(users);
+    
 });
 router.route('/allow/customers/:reference') 
 .get(function (req: Request, res: Response) {

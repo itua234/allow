@@ -7,27 +7,19 @@ const redisPassword = process.env.REDIS_PASSWORD || 'YOUR-REDIS-PASSWORD';
 const redisUser = process.env.REDIS_USER || '';
 const redisTls = process.env.REDIS_TLS === 'true';
 
-//if (!client) { 
-  client = createClient({
-    url: `rediss://default:${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
-    socket: {
-      connectTimeout: 10000, // Set timeout to 10 seconds
-    },
-  });
-  client.on("error", (error) => {
-    console.error("Redis client error:", error);
-  });
-  client.on("connect", () => {
-    console.log('Redis URL:', `rediss://default:${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`);
-    console.log("Connected to Redis");
-  });
-  (async () => {
-    try {
-      await client.connect();
-    } catch (error) {
-      console.error("Error connecting to Redis:", error);
-    }
-  })();
-//}
+client = createClient({
+  url: `rediss://default:${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+  socket: {
+    connectTimeout: 10000, // Set timeout to 10 seconds
+  },
+});
 
-module.exports = client;
+client.on("connect", () => console.log("Connected to Redis"));
+
+client.on('error', (err) => console.log('Redis Client Error', err));
+
+(async () => {
+  await client.connect();
+})();
+
+module.exports = client; 

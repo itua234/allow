@@ -63,10 +63,7 @@ module.exports = (sequelize: Sequelize, DataTypes: typeof import('sequelize').Da
         tableName: 'requests',
         timestamps: true,
         createdAt: 'created_at',
-        updatedAt: 'updated_at',
-        defaultScope: {
-            //attributes: { exclude: ['createdAt', 'updatedAt'] }
-        }
+        updatedAt: 'updated_at'
     });
 
     return Request;
