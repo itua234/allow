@@ -10,9 +10,14 @@
     "build": "tsc",
     "test:faker": "node ./test-faker.ts",
     "test": "dotenv -e .env.test -- jest --detectOpenHandles",
-    "db:seed": "npx sequelize-cli --ts db:seed",
-    "db:seed:ts": "npx sequelize-cli --ts db:seed --seed name-of-seed-as-in-data",
-    "db:seed:all:ts": "npx sequelize-cli --ts db:seed:all"
+    "db:seed": "npx sequelize-cli db:seed:all",
+    "db:seed:undo": "npx sequelize-cli db:seed:undo",
+    "db:seed:all:ts": "npx sequelize-cli --ts db:seed:all",
+    "db:migrate": "npx sequelize-cli --ts db:migrate",
+    "db:migrate:undo": "npx sequelize-cli db:migrate:undo",
+    "db:migrate:status:ts": "npx sequelize-cli --ts db:migrate:status",
+    "db:migrate:generate": "npx sequelize-cli --ts migration:generate --name name-of-migration",
+    "migrate:fresh": "npx sequelize-cli db:drop && sequelize-cli db:create && sequelize-cli db:migrate"
   },
   "author": "Itua Osemeilu",
   "license": "ISC",

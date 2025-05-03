@@ -40,6 +40,25 @@ class TokenVaultService {
             throw error;
         }
     }
+
+    async storeOTP(kyc_token, otpData){
+        const key = `otp:${kyc_token}`;
+        await client.set(key, JSON.stringify(otpData), {
+            EX: 600 // 10 minutes expiry
+        });
+    }
+
+    async retrieveOTP(kyc_token) {
+        const key = `otp:${kyc_token}`;
+        const data = await client.get(key);
+        return data ? JSON.parse(data) : null;
+    }
+
+    async clearOTP(kyc_token) {
+        const key = `otp:${kyc_token}`;
+        const deletedCount = await client.del(key);
+        return deletedCount > 0;
+    }
 }
 
 module.exports = new TokenVaultService();

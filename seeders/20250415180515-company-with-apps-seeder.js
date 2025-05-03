@@ -87,6 +87,9 @@ module.exports = {
       const testSecret = `sk_test_${crypto.createHmac('sha256', SECRET_SALT).update(app.test_public_key).digest('hex')}`;
       const liveSecret = `sk_live_${crypto.createHmac('sha256', SECRET_SALT).update(app.live_public_key).digest('hex')}`;
 
+      console.log('Test Secret:', testSecret);
+      console.log('Live Secret:', liveSecret);
+      console.log('App ID:', app.id);
       await client.set(`secret:${testSecret}`, app.id); // Store test secret key in Redis
       await client.set(`secret:${liveSecret}`, app.id); // Store live secret key in Redis
     }

@@ -4,6 +4,7 @@ const { encrypt, decrypt } = require('@util/helper');
 export interface CustomerAttributes extends Model<InferAttributes<CustomerAttributes>, InferCreationAttributes<CustomerAttributes>> {
     id: string;
     token: string;
+    phone?: string | null;
     phone_verified_at?: Date;
     verified: boolean;
     verified_at?: Date;
@@ -20,6 +21,22 @@ module.exports = (sequelize: Sequelize, DataTypes: typeof import('sequelize').Da
     const Customer = <CustomerModelStatic>sequelize.define('Customer', {
         id: { type: DataTypes.UUID, primaryKey: true, defaultValue: DataTypes.UUIDV4 },
         token: { type: DataTypes.TEXT, allowNull: false },
+        phone: {
+            type: DataTypes.TEXT,
+            unique: true,
+            allowNull: true,
+            get() {
+                const value = this.getDataValue('phone');
+                return value ? decrypt(value) : null;
+            },
+            set(value: string) {
+                if (value) {
+                    this.setDataValue('phone', encrypt(value));
+                } else {
+                    this.setDataValue('phone', null);
+                }
+            }
+        },
         phone_verified_at: { type: DataTypes.DATE, allowNull: true },
         verified: {
             type: DataTypes.BOOLEAN,
