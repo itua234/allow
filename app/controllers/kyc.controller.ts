@@ -80,7 +80,7 @@ exports.initiate = async(req: ExpressRequest, res: Response) => {
     }
 }
 
-exports.showVerificationpage = async(req: ExpressRequest, res: Response) => {
+exports.showVerificationPage = async(req: ExpressRequest, res: Response) => {
     const { kyc_token } = req.params;
     try {
         // Retrieve the customer data securely using the token
@@ -91,21 +91,33 @@ exports.showVerificationpage = async(req: ExpressRequest, res: Response) => {
                 error: true
             });
         }
+        // const request = await Request.findOne({
+        //     where: {
+        //         kyc_token,
+        //         token_expires_at: { [Op.gt]: new Date() },
+        //         token_used: false
+        //     }
+        // });
         const request = await Request.findOne({ where: { kyc_token } });
-        // Decrypt the customer data before sending it to the client
-        //const decryptedCustomer = decrypt(customer);
+        if (!request) return;
+        //return res.redirect('/expired-or-invalid-token');
+        return res.render('main', { request, customer });
+        // Generate a session-based verification token
+        // const sessionToken = crypto.randomBytes(32).toString('hex');
+        // await tokenVaultService.storeSessionToken(sessionToken, kyc_token, {
+        //     expiresIn: '15m'
+        // });
+        // // Mark original token as used
+        // await request.update({ token_used: true });
+        // // Render with minimal data
+        // return res.render('main', {
+        //     sessionToken,
+        //     flow: request.kyc_level
+        // });
 
-        return res.status(200).json({
-            message: 'Customer data retrieved successfully',
-            customer: {request, customer},
-            error: false
-        });
     } catch (error) {
-        console.log('Error retrieving customer data:', error);
-        return res.status(500).json({
-            message: 'An error occurred while retrieving customer data',
-            error: true
-        });
+        console.error('Error in verification page:', error);
+        return res.redirect('/error');
     }
 }
 
@@ -187,3 +199,69 @@ exports.verifyOTP = async(req: ExpressRequest, res: Response) => {
         });
     }
 }
+
+exports.verifyStep = async (req: ExpressRequest, res: Response) => {
+    const { sessionToken } = req.body;
+    
+    // This will get the kyc_token and invalidate the session
+    const kyc_token = await tokenVaultService.validateSession(sessionToken);
+    if (!kyc_token) {
+        return res.status(401).json({ error: 'Invalid or expired session' });
+    }
+    
+    // Continue with verification...
+}
+
+// exports.verifyPhone = async(req: ExpressRequest, res: Response) => {
+//     const { phone, sessionToken } = req.body;
+    
+//     try {
+//         // Get session data including progress
+//         const sessionData = await tokenVaultService.getSessionData(sessionToken);
+//         if (!sessionData) {
+//             return res.status(401).json({ error: 'Invalid session' });
+//         }
+
+//         // Check if phone is already verified in database
+//         const customer = await Customer.findOne({
+//             where: { kyc_token: sessionData.kyc_token }
+//         });
+
+//         if (customer.phone_verified_at) {
+//             return res.status(409).json({
+//                 error: 'Phone already verified',
+//                 shouldRefresh: true // Tell frontend to refresh state
+//             });
+//         }
+
+//         // Continue with verification...
+//         await sequelize.transaction(async (t) => {
+//             await customer.update({
+//                 phone: encrypt(phone),
+//                 phone_verified_at: new Date()
+//             }, { transaction: t });
+//         });
+
+//         // Update session progress
+//         const newSessionToken = await tokenVaultService.progressSession(sessionToken, 'phone');
+
+//         return res.json({
+//             success: true,
+//             sessionToken: newSessionToken
+//         });
+//     } catch (error) {
+//         console.error('Error:', error);
+//         return res.status(500).json({ error: 'Server error' });
+//     }
+// };
+// export const logVerificationAttempt = async (requestId: string, status: string, metadata: any) => {
+//     await AuditLog.create({
+//         request_id: requestId,
+//         action: 'VERIFICATION_ATTEMPT',
+//         status,
+//         metadata,
+//         ip_address: metadata.ip,
+//         user_agent: metadata.userAgent
+//     });
+// };
+// <input type="hidden" name="sessionToken" value="<%= sessionToken %>" />

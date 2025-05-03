@@ -59,6 +59,70 @@ class TokenVaultService {
         const deletedCount = await client.del(key);
         return deletedCount > 0;
     }
+
+    async storeSessionToken(sessionToken, kyc_token, options) {
+        await client.set(
+            `session:${sessionToken}`,
+            kyc_token,
+            'EX',
+            parseDuration(options.expiresIn)
+        );
+        // await client.set(
+        //     `session:${sessionToken}`,
+        //     JSON.stringify({
+        //         kyc_token,
+        //         created_at: new Date(),
+        //         ip_address: req.ip,
+        //         user_agent: req.headers['user-agent']
+        //     }),
+        //     'EX',
+        //     parseDuration(options.expiresIn)
+        // );
+    }
+
+    async validateSession(sessionToken) {
+        const kyc_token = await client.get(`session:${sessionToken}`);
+        if (!kyc_token) return null;
+        
+        // One-time use
+        await client.del(`session:${sessionToken}`);
+        return kyc_token;
+    }
 }
 
 module.exports = new TokenVaultService();
+
+// export const storeSessionToken = async (sessionToken: string, kyc_token: string, options: { expiresIn: string }) => {
+//     await client.set(
+//         `session:${sessionToken}`,
+//         JSON.stringify({
+//             kyc_token,
+//             progress: {
+//                 currentStep: 'phone',
+//                 completedSteps: [],
+//                 lastUpdated: new Date()
+//             }
+//         }),
+//         'EX',
+//         parseDuration(options.expiresIn)
+//     );
+// };
+
+// export const updateSessionProgress = async (sessionToken: string, step: string) => {
+//     const session = await client.get(`session:${sessionToken}`);
+//     if (!session) return null;
+
+//     const sessionData = JSON.parse(session);
+//     sessionData.progress.completedSteps.push(step);
+//     sessionData.progress.currentStep = getNextStep(step);
+    
+//     // Store updated progress
+//     await client.set(
+//         `session:${sessionToken}`,
+//         JSON.stringify(sessionData),
+//         'EX',
+//         parseDuration('15m')
+//     );
+
+//     return sessionData;
+// };

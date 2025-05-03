@@ -4,6 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
+import csrf from 'csurf';
 dotenv.config(); // Load environment variables
 import 'module-alias/register';
 // import './app/services/queues';
@@ -41,11 +42,17 @@ app.use(cors({
 // Security middleware
 app.use(helmet());
 
+app.use(csrf());
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
+
 // Rate limiting
 const limiter = rateLimit({
-  max: 100, // limit each IP to 100 requests per windowMs
-  windowMs: 60 * 60 * 1000, // 1 hour
-  message: 'Too many requests from this IP, please try again in an hour!'
+  max: 5, // limit each IP to 5 requests per windowMs
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  message: 'Too many verification attempts, please try again later'
 });
 
 const { PORT, NODE_ENV } = process.env;
